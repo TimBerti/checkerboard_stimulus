@@ -28,7 +28,6 @@ class CheckerBoard:
     def update_params(self, tile_size, color1, color2, frequency, screen_width, screen_height):
         self._init_board_params(tile_size, color1, color2,
                                 frequency, screen_width, screen_height)
-        # Filling the surface with black color to clear previous board
         self.surface.fill((0, 0, 0))
         pygame.display.flip()
 
@@ -62,21 +61,3 @@ class CheckerBoard:
 
     def _get_color_sequence(self):
         return (self.color1, self.color2) if int(time.time() * self.frequency) % 2 == 0 else (self.color2, self.color1)
-
-
-# Example usage
-
-if __name__ == "__main__":
-    board = CheckerBoard(100, color1=(255, 0, 0), color2=(
-        0, 255, 0), frequency=2)
-    board.start()
-
-    while True:
-        time.sleep(5)
-        print("changing parameters...")
-        board.update_params(tile_size=100, color1=(
-            255, 255, 0), color2=(0, 255, 255), frequency=16)
-        time.sleep(5)
-        print("changing parameters...")
-        board.update_params(tile_size=100, color1=(
-            255, 0, 0), color2=(0, 255, 0), frequency=16)
