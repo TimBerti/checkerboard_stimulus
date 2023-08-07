@@ -1,7 +1,7 @@
 import time
 import colour
+import threading
 import tkinter as tk
-from tkinter import messagebox
 from checkerboard import CheckerBoard
 
 
@@ -14,6 +14,10 @@ class CheckerBoardGUI:
                      "color2": "0,255,0", "frequency": 1.0, "screen_width": 1920, "screen_height": 1080},
         "Preset 3": {"tile_size": 60, "color1": "255,255,0",
                      "color2": "0,255,255", "frequency": 1.5, "screen_width": 1920, "screen_height": 1080},
+        "Preset 4": {"tile_size": 60, "color1": "231,240,0",
+                     "color2": "146,255,0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
+        "Preset 5": {"tile_size": 60, "color1": "255,255,255",
+                     "color2": "0,0,0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
     }
 
     SERIES = {
@@ -21,6 +25,13 @@ class CheckerBoardGUI:
             {"preset": "Preset 1", "duration": 2.0},
             {"preset": "Preset 2", "duration": 5.0},
             {"preset": "Preset 3", "duration": 5.0}
+        ],
+        "Series 2": [
+            {"preset": "Preset 1", "duration": 2.0},
+            {"preset": "Preset 5", "duration": 4.0},
+            {"preset": "Preset 4", "duration": 4.0},
+            {"preset": "Preset 5", "duration": 4.0},
+            {"preset": "Preset 4", "duration": 4.0}
         ],
     }
 
@@ -71,30 +82,27 @@ class CheckerBoardGUI:
         tk.Button(self.root, text="Pause",
                   command=self.pause).grid(row=10, column=0)
 
-        for i, (preset, settings) in enumerate(self.PRESETS.items()):
+        i = 0
+        for preset, settings in self.PRESETS.items():
             tk.Button(self.root, text=preset, command=lambda settings=settings: self.apply_settings(
                 settings)).grid(row=int(11+(i/3) % 3), column=i % 3)
+            i += 1
 
-        for i, (series, sequence) in enumerate(self.SERIES.items()):
+        for series, sequence in self.SERIES.items():
             tk.Button(self.root, text=series, command=lambda sequence=sequence: self.run_sequence(
-                sequence)).grid(row=int(12+(i/3) % 3), column=i % 3)
+                sequence)).grid(row=int(11+(i/3) % 3), column=i % 3)
+            i += 1
 
     def start(self):
-        try:
-            self.board = CheckerBoard(*self._get_params())
-            self.board.start()
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+        self.board = CheckerBoard(*self._get_params())
+        self.board.start()
 
     def update(self):
-        try:
-            if self.board:
-                self.board.update_params(*self._get_params())
-                self.update_color_vision_deficiency()
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+        if self.board:
+            self._update_color_vision_deficiency()
+            self.board.update_params(*self._get_params())
 
-    def update_color_vision_deficiency(self):
+    def _update_color_vision_deficiency(self):
         self.color_vision_deficency["deficiency"] = self.deficiency.get()
         self.color_vision_deficency["severity"] = self.severity.get()
 
@@ -149,6 +157,9 @@ class CheckerBoardGUI:
         self.update()
 
     def run_sequence(self, sequence):
+        threading.Thread(target=self._sequence, args=[sequence]).start()
+
+    def _sequence(self, sequence):
         for step in sequence:
             self.apply_settings(self.PRESETS[step["preset"]])
             time.sleep(step["duration"])
