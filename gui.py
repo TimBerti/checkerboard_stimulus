@@ -122,13 +122,9 @@ class CheckerBoardGUI:
             color_vision_deficency_model = colour.blindness.matrix_cvd_Machado2009(
                 self.color_vision_deficency["deficiency"], self.color_vision_deficency["severity"])
             color1 = colour.algebra.vector_dot(
-                color_vision_deficency_model, color1)
+                color_vision_deficency_model, color1).clip(0, 255)
             color2 = colour.algebra.vector_dot(
-                color_vision_deficency_model, color2)
-            color1 = [0 if colour1 < 0 else 255 if colour1 >
-                      255 else colour1 for colour1 in color1]
-            color2 = [0 if colour2 < 0 else 255 if colour2 >
-                      255 else colour2 for colour2 in color2]
+                color_vision_deficency_model, color2).clip(0, 255)
 
         return color1, color2
 
