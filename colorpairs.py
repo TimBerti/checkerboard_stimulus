@@ -5,24 +5,11 @@ from itertools import product
 from tqdm import tqdm
 
 
-def color_distance(color1, color2):
-    return np.linalg.norm(color1 - color2)
-
-
-def color_pair_matches(color1, color2, threshold):
-    return color_distance(color1, color2) <= threshold
-
-
-def color_pair_matches_only_with_color_vision_deficiency(color1, color2, M, threshold):
-    transformed_color1 = M @ color1
-    transformed_color2 = M @ color2
-    return color_pair_matches(transformed_color1, transformed_color2, threshold) and not color_pair_matches(color1, color2, threshold)
-
-
 def save_matching_pairs(matching_pairs, file_name):
     with open(f'{file_name}.csv', 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['color1', 'color2', 'distance'])
+        writer.writerow(['color1', 'color2', 'transformed_color1',
+                        'transformed_color2', 'distance', 'transformed_distance'])
         writer.writerows(matching_pairs)
 
 
@@ -33,9 +20,16 @@ def scan_grid_for_matching_pairs(grid, color_vision_deficency, file_name, thresh
 
     print(f'{file_name}')
     for color_pair in tqdm(grid, total=128**4):
-        if color_pair_matches_only_with_color_vision_deficiency(*color_pair, M, threshold):
+        color1, color2 = color_pair
+        transformed_color1 = np.rint(M @ color1).astype(int)
+        transformed_color2 = np.rint(M @ color2).astype(int)
+
+        distance = np.linalg.norm(color1 - color2)
+        transformed_distance = np.linalg.norm(
+            transformed_color1 - transformed_color2)
+        if distance > threshold and transformed_distance <= threshold:
             matching_pairs.append(
-                [*(tuple(color) for color in color_pair), color_distance(*color_pair)])
+                [tuple(color1), tuple(color2), tuple(transformed_color1), tuple(transformed_color2), distance, transformed_distance])
 
     save_matching_pairs(matching_pairs, file_name)
 

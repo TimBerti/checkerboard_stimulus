@@ -2,6 +2,7 @@ import time
 import colour
 import threading
 import tkinter as tk
+import numpy as np
 from checkerboard import CheckerBoard
 
 
@@ -121,10 +122,10 @@ class CheckerBoardGUI:
         if self.color_vision_deficency["severity"] > 0:
             color_vision_deficency_model = colour.blindness.matrix_cvd_Machado2009(
                 self.color_vision_deficency["deficiency"], self.color_vision_deficency["severity"])
-            color1 = colour.algebra.vector_dot(
-                color_vision_deficency_model, color1).clip(0, 255)
-            color2 = colour.algebra.vector_dot(
-                color_vision_deficency_model, color2).clip(0, 255)
+            color1 = np.round(colour.algebra.vector_dot(
+                color_vision_deficency_model, color1).clip(0, 255)).astype(int)
+            color2 = np.round(colour.algebra.vector_dot(
+                color_vision_deficency_model, color2).clip(0, 255)).astype(int)
 
         return color1, color2
 
