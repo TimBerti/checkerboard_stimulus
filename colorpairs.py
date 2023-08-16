@@ -26,7 +26,7 @@ def save_matching_pairs(matching_pairs, file_name):
         writer.writerows(matching_pairs)
 
 
-def scan_grid_for_matching_pairs(grid, color_vision_deficency, file_name, threshold=1):
+def scan_grid_for_matching_pairs(grid, color_vision_deficency, file_name, threshold=0):
     M = colour.blindness.matrix_cvd_Machado2009(color_vision_deficency, 1)
 
     matching_pairs = []
@@ -55,10 +55,10 @@ def main():
     blues_no_green = np.array(
         list(product(range(0, 128), [0], range(128, 256))))
 
-    # color_vision_deficency = 'Protanomaly'
-    # grid = product(greens_no_blue, greens_no_red)
-    # scan_grid_for_matching_pairs(
-    #     grid, color_vision_deficency, 'Protanomaly_green')
+    color_vision_deficency = 'Protanomaly'
+    grid = product(greens_no_blue, greens_no_red)
+    scan_grid_for_matching_pairs(
+        grid, color_vision_deficency, 'Protanomaly_green')
 
     color_vision_deficency = 'Protanomaly'
     grid = product(blues_no_red, blues_no_green)
