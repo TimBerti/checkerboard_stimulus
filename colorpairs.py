@@ -5,65 +5,77 @@ from itertools import product
 from tqdm import tqdm
 
 
-reds_no_green = np.array(
-    list(product(range(128, 256), [0], range(0, 128))))
-reds_no_blue = np.array(
-    list(product(range(128, 256), range(0, 128), [0])))
-greens_no_blue = np.array(
-    list(product(range(0, 128), range(128, 256), [0])))
-greens_no_red = np.array(
-    list(product([0], range(128, 256), range(0, 128))))
-blues_no_red = np.array(
-    list(product([0], range(0, 128), range(128, 256))))
-blues_no_green = np.array(
-    list(product(range(0, 128), [0], range(128, 256))))
+class ColorspaceScanner:
 
-def save_matching_pairs(matching_pairs, file_name):
-    with open(f'{file_name}.csv', 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(['color1', 'color2', 'transformed_color1',
-                        'transformed_color2', 'distance', 'transformed_distance'])
-        writer.writerows(matching_pairs)
+    reds_no_green = np.array(
+        list(product(range(128, 256), [0], range(0, 128))))
+    reds_no_blue = np.array(
+        list(product(range(128, 256), range(0, 128), [0])))
+    greens_no_blue = np.array(
+        list(product(range(0, 128), range(128, 256), [0])))
+    greens_no_red = np.array(
+        list(product([0], range(128, 256), range(0, 128))))
+    blues_no_red = np.array(
+        list(product([0], range(0, 128), range(128, 256))))
+    blues_no_green = np.array(
+        list(product(range(0, 128), [0], range(128, 256))))
+    
+    grid = {
+        'red': product(reds_no_green, reds_no_blue),
+        'green': product(greens_no_blue, greens_no_red),
+        'blue': product(blues_no_red, blues_no_green)
+    }
+    
+    def __init__(self, color_vision_deficency, threshold=0):
+        self.color_vision_deficency = color_vision_deficency
+        self.threshold = threshold
+        self.matching_pairs = {'red': [], 'green': [], 'blue': []}
+
+        self.transformation_matrix = colour.blindness.matrix_cvd_Machado2009(self.color_vision_deficency, 1)
 
 
-def scan_grid_for_matching_pairs(grid, color_vision_deficency, file_name, threshold):
-    M = colour.blindness.matrix_cvd_Machado2009(color_vision_deficency, 1)
+    def save_matching_pairs(self, color):
+        filename = f'{self.color_vision_deficency}_{color}.csv'
+        with open(filename, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['color1', 'color2', 'transformed_color1',
+                            'transformed_color2', 'distance', 'transformed_distance'])
+            writer.writerows(self.matching_pairs[color])
 
-    matching_pairs = []
 
-    print(f'{file_name}')
-    for color_pair in tqdm(grid, total=128**4):
-        color1, color2 = color_pair
-        transformed_color1 = np.rint(M @ color1).astype(int).clip(0, 255)
-        transformed_color2 = np.rint(M @ color2).astype(int).clip(0, 255)
+    def scan_grid_for_matching_pairs(self, color):
 
-        distance = np.linalg.norm(color1 - color2)
-        transformed_distance = np.linalg.norm(
-            transformed_color1 - transformed_color2)
-        if distance > threshold and transformed_distance <= threshold:
-            matching_pairs.append(
-                [tuple(color1), tuple(color2), tuple(transformed_color1), tuple(transformed_color2), distance, transformed_distance])
+        print(f'{self.color_vision_deficency}_{color}')
+        for color_pair in tqdm(self.grid[color], total=128**4):
+            color1, color2 = color_pair
+            transformed_color1 = np.rint(self.transformation_matrix @ color1).astype(int).clip(0, 255)
+            transformed_color2 = np.rint(self.transformation_matrix @ color2).astype(int).clip(0, 255)
 
-    save_matching_pairs(matching_pairs, file_name)
+            distance = np.linalg.norm(color1 - color2)
+            transformed_distance = np.linalg.norm(
+                transformed_color1 - transformed_color2)
+            if distance > self.threshold and transformed_distance <= self.threshold:
+                self.matching_pairs[color].append(
+                    [tuple(color1), tuple(color2), tuple(transformed_color1), tuple(transformed_color2), distance, transformed_distance])
 
-def scan_colorspace(color_vision_deficency, threshold=0):
-    grid = product(reds_no_blue, reds_no_green, threshold)
-    scan_grid_for_matching_pairs(
-        grid, color_vision_deficency, f'{color_vision_deficency}_red')
+        self.save_matching_pairs(color)
 
-    grid = product(greens_no_blue, greens_no_red, threshold)
-    scan_grid_for_matching_pairs(
-        grid, color_vision_deficency, f'{color_vision_deficency}_green')
-
-    grid = product(blues_no_green, blues_no_red, threshold)
-    scan_grid_for_matching_pairs(
-        grid, color_vision_deficency, f'{color_vision_deficency}_blue')
+    def scan_colorspace(self):
+        self.scan_grid_for_matching_pairs('red')
+        self.scan_grid_for_matching_pairs('green')
+        self.scan_grid_for_matching_pairs('blue')
 
 
 def main():
-    scan_colorspace('Protanopia')
-    scan_colorspace('Deuteranopia')
-    scan_colorspace('Tritanopia', threshold=2)
+
+    scanner = ColorspaceScanner('Protanomaly')
+    scanner.scan_colorspace()
+
+    scanner = ColorspaceScanner('Deuteranomaly')
+    scanner.scan_colorspace()
+
+    scanner = ColorspaceScanner('Tritanomaly')
+    scanner.scan_colorspace()
 
 
 if __name__ == '__main__':
