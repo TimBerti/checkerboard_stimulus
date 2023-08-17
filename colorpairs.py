@@ -20,16 +20,17 @@ class ColorspaceScanner:
     blues_no_green = np.array(
         list(product(range(0, 128), [0], range(128, 256))))
     
-    grid = {
-        'red': product(reds_no_green, reds_no_blue),
-        'green': product(greens_no_blue, greens_no_red),
-        'blue': product(blues_no_red, blues_no_green)
-    }
     
     def __init__(self, color_vision_deficency, threshold=0):
         self.color_vision_deficency = color_vision_deficency
         self.threshold = threshold
+
         self.matching_pairs = {'red': [], 'green': [], 'blue': []}
+        self.grid = {
+            'red': product(self.reds_no_green, self.reds_no_blue),
+            'green': product(self.greens_no_blue, self.greens_no_red),
+            'blue': product(self.blues_no_red, self.blues_no_green)
+        }
 
         self.transformation_matrix = colour.blindness.matrix_cvd_Machado2009(self.color_vision_deficency, 1)
 
