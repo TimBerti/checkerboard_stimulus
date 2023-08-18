@@ -8,31 +8,68 @@ from checkerboard import CheckerBoard
 
 class CheckerBoardGUI:
 
+
     PRESETS = {
-        "Preset 1": {"tile_size": 60, "color1": "255,255,255",
+        "black_and_white_slow": {"tile_size": 60, "color1": "255,255,255",
                      "color2": "0,0,0", "frequency": 1.0, "screen_width": 1920, "screen_height": 1080},
-        "Preset 2": {"tile_size": 60, "color1": "0,0,255",
-                     "color2": "0,255,0", "frequency": 1.0, "screen_width": 1920, "screen_height": 1080},
-        "Preset 3": {"tile_size": 60, "color1": "255,255,0",
-                     "color2": "0,255,255", "frequency": 1.5, "screen_width": 1920, "screen_height": 1080},
-        "Preset 4": {"tile_size": 60, "color1": "231,240,0",
-                     "color2": "146,255,0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "Preset 5": {"tile_size": 60, "color1": "255,255,255",
+        "black_and_white": {"tile_size": 60, "color1": "255,255,255",
                      "color2": "0,0,0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
+        "protanomaly_red": {"tile_size": 60, "color1": "254, 0, 1",
+                     "color2": "128, 18, 0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
+        "protanomaly_green": {"tile_size": 60, "color1": "127, 234, 0",
+                     "color2": "0, 252, 12", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
+        "protanomaly_blue": {"tile_size": 60, "color1": "0, 20, 243",
+                     "color2": "127, 0, 255", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
+        "deuteranomaly_red": {"tile_size": 60, "color1": "255, 0, 4",
+                     "color2": "128, 54, 0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
+        "deuteranomaly_green": {"tile_size": 60, "color1": "32, 161, 0",
+                     "color2": "0, 174, 0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
+        "deuteranomaly_blue": {"tile_size": 60, "color1": "0, 54, 128",
+                     "color2": "127, 0, 132", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
+        "tritanomaly_red": {"tile_size": 60, "color1": "210, 0, 51",
+                     "color2": "255, 22, 0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
+        "tritanomaly_green": {"tile_size": 60, "color1": "15, 251, 0",
+                     "color2": "0, 247, 12", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
+        "tritanomaly_blue": {"tile_size": 60, "color1": "0, 0, 193",
+                     "color2": "16, 0, 195", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
     }
 
     SERIES = {
-        "Series 1": [
-            {"preset": "Preset 1", "duration": 2.0},
-            {"preset": "Preset 2", "duration": 5.0},
-            {"preset": "Preset 3", "duration": 5.0}
+        "protanomaly_series": [
+            {"preset": "black_and_white", "duration": 2.0},
+            {"preset": "protanomaly_red", "duration": 4.0},
+            {"preset": "protanomaly_green", "duration": 4.0},
+            {"preset": "protanomaly_blue", "duration": 4.0},
         ],
-        "Series 2": [
-            {"preset": "Preset 1", "duration": 2.0},
-            {"preset": "Preset 5", "duration": 4.0},
-            {"preset": "Preset 4", "duration": 4.0},
-            {"preset": "Preset 5", "duration": 4.0},
-            {"preset": "Preset 4", "duration": 4.0}
+        "deuteranomaly_series": [
+            {"preset": "black_and_white", "duration": 2.0},
+            {"preset": "deuteranomaly_red", "duration": 4.0},
+            {"preset": "deuteranomaly_green", "duration": 4.0},
+            {"preset": "deuteranomaly_blue", "duration": 4.0},
+        ],
+        "tritanomaly_series": [
+            {"preset": "black_and_white", "duration": 2.0},
+            {"preset": "tritanomaly_red", "duration": 4.0},
+            {"preset": "tritanomaly_green", "duration": 4.0},
+            {"preset": "tritanomaly_blue", "duration": 4.0},
+        ],
+        "red_series": [
+            {"preset": "black_and_white", "duration": 2.0},
+            {"preset": "protanomaly_red", "duration": 4.0},
+            {"preset": "deuteranomaly_red", "duration": 4.0},
+            {"preset": "tritanomaly_red", "duration": 4.0},
+        ],
+        "green_series": [
+            {"preset": "black_and_white", "duration": 2.0},
+            {"preset": "protanomaly_green", "duration": 4.0},
+            {"preset": "deuteranomaly_green", "duration": 4.0},
+            {"preset": "tritanomaly_green", "duration": 4.0},
+        ],
+        "blue_series": [
+            {"preset": "black_and_white", "duration": 2.0},
+            {"preset": "protanomaly_blue", "duration": 4.0},
+            {"preset": "deuteranomaly_blue", "duration": 4.0},
+            {"preset": "tritanomaly_blue", "duration": 4.0},
         ],
     }
 
@@ -83,16 +120,27 @@ class CheckerBoardGUI:
         tk.Button(self.root, text="Pause",
                   command=self.pause).grid(row=10, column=0)
 
+        max_columns = 3
+
+        # Calculate the total number of rows needed for the presets
+        preset_rows = len(self.PRESETS) // max_columns
+        if len(self.PRESETS) % max_columns > 0:
+            preset_rows += 1
+
         i = 0
         for preset, settings in self.PRESETS.items():
             tk.Button(self.root, text=preset, command=lambda settings=settings: self.apply_settings(
-                settings)).grid(row=int(11+(i/3) % 3), column=i % 3)
+                settings)).grid(row=11 + i // max_columns, column=max_columns - 1 - (i % max_columns))
             i += 1
 
+        i = 0  # Reset the counter for series buttons
         for series, sequence in self.SERIES.items():
             tk.Button(self.root, text=series, command=lambda sequence=sequence: self.run_sequence(
-                sequence)).grid(row=int(11+(i/3) % 3), column=i % 3)
+                sequence)).grid(row=11 + preset_rows + i // max_columns, column=max_columns - 1 - (i % max_columns))
             i += 1
+
+        self.apply_settings(self.PRESETS["black_and_white_slow"])
+
 
     def start(self):
         self.board = CheckerBoard(*self._get_params())
@@ -160,7 +208,7 @@ class CheckerBoardGUI:
         for step in sequence:
             self.apply_settings(self.PRESETS[step["preset"]])
             time.sleep(step["duration"])
-        self.pause()
+        self.apply_settings(self.PRESETS["black_and_white_slow"])
 
     def run(self):
         self.root.mainloop()
