@@ -52,9 +52,9 @@ class ColorspaceScanner:
             transformed_color1 = np.rint(self.transformation_matrix @ color1).astype(int).clip(0, 255)
             transformed_color2 = np.rint(self.transformation_matrix @ color2).astype(int).clip(0, 255)
 
-            distance = np.linalg.norm(color1 - color2)
+            distance = np.linalg.norm(color1 - color2, 1)
             transformed_distance = np.linalg.norm(
-                transformed_color1 - transformed_color2)
+                transformed_color1 - transformed_color2, 1)
             if distance > self.threshold and transformed_distance <= self.threshold:
                 self.matching_pairs[color].append(
                     [tuple(color1), tuple(color2), tuple(transformed_color1), tuple(transformed_color2), distance, transformed_distance])
