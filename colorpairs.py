@@ -37,7 +37,7 @@ class ColorspaceScanner:
 
     def save_matching_pairs(self, color):
         filename = f'{self.color_vision_deficency}_{color}.csv'
-        with open(filename, 'w', newline='') as f:
+        with open(f'color_pairs/{filename}', 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(['color1', 'color2', 'transformed_color1',
                             'transformed_color2', 'distance', 'transformed_distance'])
