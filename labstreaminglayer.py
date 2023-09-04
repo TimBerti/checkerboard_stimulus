@@ -1,6 +1,8 @@
 from pylsl import StreamInfo, StreamOutlet, StreamInlet, resolve_stream
-import time
 from threading import Thread, Event
+import time
+import uuid
+import csv
 
 
 class LSLSender:
@@ -15,9 +17,10 @@ class LSLSender:
             if self.event.is_set():
                 break
             self.outlet.push_sample(self.sample)
-            time.sleep(frequency)
+            time.sleep(1/frequency)
 
-    def start_sending_thread(self, sample, frequency=1/250):
+    def start_sending_thread(self, sample, frequency=250):
+        self.event.clear()
         self.sample = sample
         Thread(target=self._send_sample, args=[frequency]).start()
 
@@ -30,50 +33,49 @@ class LSLSender:
 
 class LSLReceiver:
 
-    def __init__(self):
-        stream = resolve_stream('type', 'Marker')
-        self.marker_inlet = StreamInlet(stream[0])
+    def __init__(self, type='EEG'):
 
-        stream = resolve_stream('type', 'EEG')
-        self.eeg_inlet = StreamInlet(stream[0])
-
+        stream = resolve_stream('type', type)
+        self.inlet = StreamInlet(stream[0])
         self.event = Event()
     
-    def _recieve_sample(self, frequency):
+    def _recieve_sample(self, filename):
+        data = []
         while True:
             if self.event.is_set():
                 break
-            marker, _ = self.marker_inlet.pull_sample()
-            eeg_data, timestamp = self.eeg_inlet.pull_sample()
-            print(timestamp, eeg_data, marker[0])
-            time.sleep(frequency)
+            sample, timestamp = self.inlet.pull_sample()
+            data.append([timestamp] + sample)
+        with open(f'{filename}_{uuid.uuid4()}.csv', 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['timestamp'] + [f'Ch{i+1}' for i in range(len(sample))])
+            writer.writerows(data)
     
-    def start_recieving_thread(self, frequency=1/250):
-        Thread(target=self._recieve_sample, args=[frequency]).start()
+    def start_recieving_thread(self, filename):
+        self.event.clear()
+        Thread(target=self._recieve_sample, args=[filename]).start()
 
     def stop_recieving_thread(self):
         self.event.set()
 
 
 def main():
-    frequency = 1
+    frequency = 250
 
-    marker_sender = LSLSender('test', 'Marker', 1, 0, 'string', 'myuidw43536')
-    marker_sender.start_sending_thread(['green'], frequency)
+    # marker_sender = LSLSender('marker', 'Markers', 1, 0, 'string', 'myuid34234')
 
     eeg_sender = LSLSender('eeg', 'EEG', 8, 250, 'float32', 'myuid34234')
     eeg_sender.start_sending_thread([1, 2, 3, 4, 5, 6, 7, 8], frequency)
 
-    receiver = LSLReceiver()
-    receiver.start_recieving_thread(frequency)
+    # receiver = LSLReceiver()
+    # receiver.start_recieving_thread()
 
-    time.sleep(5)
-    marker_sender.update_sample(['red'])
+    # time.sleep(5)
+    # eeg_sender.update_sample([8, 7, 6, 5, 4, 3, 2, 1])
 
-    time.sleep(5)
-    receiver.stop_recieving_thread()
-    marker_sender.stop_sending_thread()
-    eeg_sender.stop_sending_thread()
+    # time.sleep(5)
+    # receiver.stop_recieving_thread()
+    # eeg_sender.stop_sending_thread()
 
 
 if __name__ == '__main__':

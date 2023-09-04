@@ -4,72 +4,74 @@ import threading
 import tkinter as tk
 import numpy as np
 from checkerboard import CheckerBoard
+from labstreaminglayer import LSLReceiver
 
 
 class CheckerBoardGUI:
 
 
     PRESETS = {
-        "black_and_white_slow": {"tile_size": 60, "color1": "255,255,255",
+        "black-and-white-slow": {"tile_size": 60, "color1": "255,255,255",
                      "color2": "0,0,0", "frequency": 1.0, "screen_width": 1920, "screen_height": 1080},
-        "black_and_white": {"tile_size": 60, "color1": "255,255,255",
+        "black-and-white": {"tile_size": 60, "color1": "255,255,255",
                      "color2": "0,0,0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "protanomaly_red": {"tile_size": 60, "color1": "254, 0, 1",
+        "protanomaly-red": {"tile_size": 60, "color1": "254, 0, 1",
                      "color2": "128, 18, 0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "protanomaly_green": {"tile_size": 60, "color1": "127, 234, 0",
+        "protanomaly-green": {"tile_size": 60, "color1": "127, 234, 0",
                      "color2": "0, 252, 12", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "protanomaly_blue": {"tile_size": 60, "color1": "0, 20, 243",
+        "protanomaly-blue": {"tile_size": 60, "color1": "0, 20, 243",
                      "color2": "127, 0, 255", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "deuteranomaly_red": {"tile_size": 60, "color1": "255, 0, 4",
+        "deuteranomaly-red": {"tile_size": 60, "color1": "255, 0, 4",
                      "color2": "128, 54, 0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "deuteranomaly_green": {"tile_size": 60, "color1": "32, 161, 0",
+        "deuteranomaly-green": {"tile_size": 60, "color1": "32, 161, 0",
                      "color2": "0, 174, 0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "deuteranomaly_blue": {"tile_size": 60, "color1": "0, 54, 128",
+        "deuteranomaly-blue": {"tile_size": 60, "color1": "0, 54, 128",
                      "color2": "127, 0, 132", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "tritanomaly_red": {"tile_size": 60, "color1": "210, 0, 51",
+        "tritanomaly-red": {"tile_size": 60, "color1": "210, 0, 51",
                      "color2": "255, 22, 0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "tritanomaly_green": {"tile_size": 60, "color1": "15, 251, 0",
+        "tritanomaly-green": {"tile_size": 60, "color1": "15, 251, 0",
                      "color2": "0, 247, 12", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "tritanomaly_blue": {"tile_size": 60, "color1": "0, 0, 193",
+        "tritanomaly-blue": {"tile_size": 60, "color1": "0, 0, 193",
                      "color2": "16, 0, 195", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
     }
 
     SERIES = {
-        "protanomaly_series": [
-            {"preset": "black_and_white", "duration": 2.0},
-            {"preset": "protanomaly_red", "duration": 4.0},
-            {"preset": "protanomaly_green", "duration": 4.0},
-            {"preset": "protanomaly_blue", "duration": 4.0},
+        "protanomaly-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "protanomaly-red", "duration": 4.0},
+            {"preset": "protanomaly-green", "duration": 4.0},
+            {"preset": "protanomaly-blue", "duration": 4.0},
         ],
-        "deuteranomaly_series": [
-            {"preset": "black_and_white", "duration": 2.0},
-            {"preset": "deuteranomaly_red", "duration": 4.0},
-            {"preset": "deuteranomaly_green", "duration": 4.0},
-            {"preset": "deuteranomaly_blue", "duration": 4.0},
+        "deuteranomaly-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "deuteranomaly-red", "duration": 4.0},
+            {"preset": "deuteranomaly-green", "duration": 4.0},
+            {"preset": "deuteranomaly-blue", "duration": 4.0},
         ],
-        "tritanomaly_series": [
-            {"preset": "black_and_white", "duration": 2.0},
-            {"preset": "tritanomaly_red", "duration": 4.0},
-            {"preset": "tritanomaly_green", "duration": 4.0},
-            {"preset": "tritanomaly_blue", "duration": 4.0},
+        "tritanomaly-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "tritanomaly-red", "duration": 4.0},
+            {"preset": "tritanomaly-green", "duration": 4.0},
+            {"preset": "tritanomaly-blue", "duration": 4.0},
         ],
-        "red_series": [
-            {"preset": "black_and_white", "duration": 2.0},
-            {"preset": "protanomaly_red", "duration": 4.0},
-            {"preset": "deuteranomaly_red", "duration": 4.0},
-            {"preset": "tritanomaly_red", "duration": 4.0},
+        "red-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "protanomaly-red", "duration": 4.0},
+            {"preset": "deuteranomaly-red", "duration": 4.0},
+            {"preset": "tritanomaly-red", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 2.0},
         ],
-        "green_series": [
-            {"preset": "black_and_white", "duration": 2.0},
-            {"preset": "protanomaly_green", "duration": 4.0},
-            {"preset": "deuteranomaly_green", "duration": 4.0},
-            {"preset": "tritanomaly_green", "duration": 4.0},
+        "green-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "protanomaly-green", "duration": 4.0},
+            {"preset": "deuteranomaly-green", "duration": 4.0},
+            {"preset": "tritanomaly-green", "duration": 4.0},
         ],
-        "blue_series": [
-            {"preset": "black_and_white", "duration": 2.0},
-            {"preset": "protanomaly_blue", "duration": 4.0},
-            {"preset": "deuteranomaly_blue", "duration": 4.0},
-            {"preset": "tritanomaly_blue", "duration": 4.0},
+        "blue-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "protanomaly-blue", "duration": 4.0},
+            {"preset": "deuteranomaly-blue", "duration": 4.0},
+            {"preset": "tritanomaly-blue", "duration": 4.0},
         ],
     }
 
@@ -90,6 +92,7 @@ class CheckerBoardGUI:
         tk.Label(self.root, text="Color Vision Deficiency:").grid(
             row=7, column=0)
         tk.Label(self.root, text="Severity:").grid(row=8, column=0)
+        tk.Label(self.root, text="Filename:").grid(row=9, column=0)
 
         self.tile_size = tk.Entry(self.root)
         self.color1 = tk.Entry(self.root)
@@ -103,6 +106,7 @@ class CheckerBoardGUI:
             self.root, self.deficiency, "Protanomaly", "Deuteranomaly", "Tritanomaly")
         self.severity = tk.Scale(
             self.root, from_=0, to=1, resolution=0.1, orient=tk.HORIZONTAL,)
+        self.filename = tk.Entry(self.root)
 
         self.tile_size.grid(row=1, column=1)
         self.color1.grid(row=2, column=1)
@@ -112,13 +116,14 @@ class CheckerBoardGUI:
         self.screen_height.grid(row=6, column=1)
         self.dropdown.grid(row=7, column=1)
         self.severity.grid(row=8, column=1)
+        self.filename.grid(row=9, column=1)
 
         tk.Button(self.root, text="Start",
-                  command=self.start).grid(row=9, column=0)
+                  command=self.start).grid(row=10, column=0)
         tk.Button(self.root, text="Update",
-                  command=self.update).grid(row=9, column=1)
+                  command=self.update).grid(row=10, column=1)
         tk.Button(self.root, text="Pause",
-                  command=self.pause).grid(row=10, column=0)
+                  command=self.pause).grid(row=11, column=0)
 
         max_columns = 3
 
@@ -130,16 +135,17 @@ class CheckerBoardGUI:
         i = 0
         for preset, settings in self.PRESETS.items():
             tk.Button(self.root, text=preset, command=lambda settings=settings: self.apply_settings(
-                settings)).grid(row=11 + i // max_columns, column=max_columns - 1 - (i % max_columns))
+                settings)).grid(row=12 + i // max_columns, column=max_columns - 1 - (i % max_columns))
             i += 1
 
         i = 0  # Reset the counter for series buttons
-        for series, sequence in self.SERIES.items():
-            tk.Button(self.root, text=series, command=lambda sequence=sequence: self.run_sequence(
-                sequence)).grid(row=11 + preset_rows + i // max_columns, column=max_columns - 1 - (i % max_columns))
+        for series in self.SERIES.items():
+            tk.Button(self.root, text=series[0], command=lambda series=series: self.run_sequence(
+                *series)).grid(row=12 + preset_rows + i // max_columns, column=max_columns - 1 - (i % max_columns))
             i += 1
 
-        self.apply_settings(self.PRESETS["black_and_white_slow"])
+        self.receiver = LSLReceiver()
+        self.apply_preset("black-and-white-slow")
 
 
     def start(self):
@@ -184,6 +190,8 @@ class CheckerBoardGUI:
     def quit(self):
         if self.board:
             self.board.running = False
+        if self.receiver:
+            self.receiver.stop_recieving_thread()
         self.root.quit()
 
     def apply_settings(self, settings):
@@ -201,14 +209,23 @@ class CheckerBoardGUI:
         self.screen_height.insert(0, str(settings["screen_height"]))
         self.update()
 
-    def run_sequence(self, sequence):
-        threading.Thread(target=self._sequence, args=[sequence]).start()
+    def apply_preset(self, preset):
+        self.apply_settings(self.PRESETS[preset])
 
-    def _sequence(self, sequence):
+    def run_sequence(self, series, sequence):
+        threading.Thread(target=self._sequence, args=[series, sequence]).start()
+
+    def _sequence(self, series, sequence):
+        self.update()
+        filename = self.filename.get()
+        if filename:
+            self.receiver.start_recieving_thread(filename + "_" + series + "_" + self.color_vision_deficency["deficiency"] + "_" + str(self.color_vision_deficency["severity"]))
         for step in sequence:
-            self.apply_settings(self.PRESETS[step["preset"]])
+            self.apply_preset(step["preset"])
             time.sleep(step["duration"])
-        self.apply_settings(self.PRESETS["black_and_white_slow"])
+        if filename:
+            self.receiver.stop_recieving_thread()
+        self.apply_preset("black-and-white-slow")
 
     def run(self):
         self.root.mainloop()
