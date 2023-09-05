@@ -73,6 +73,56 @@ class CheckerBoardGUI:
             {"preset": "deuteranomaly-blue", "duration": 4.0},
             {"preset": "tritanomaly-blue", "duration": 4.0},
         ],
+        "black-and-white-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "black-and-white", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 2.0},
+        ],
+        "protanomaly-red-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "protanomaly-red", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 2.0},
+        ],
+        "deuteranomaly-red-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "deuteranomaly-red", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 2.0},
+        ],
+        "tritanomaly-red-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "tritanomaly-red", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 2.0},
+        ],
+        "protanomaly-green-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "protanomaly-green", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 2.0},
+        ],
+        "deuteranomaly-green-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "deuteranomaly-green", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 2.0},
+        ],
+        "tritanomaly-green-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "tritanomaly-green", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 2.0},
+        ],
+        "protanomaly-blue-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "protanomaly-blue", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 2.0},
+        ],
+        "deuteranomaly-blue-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "deuteranomaly-blue", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 2.0},
+        ],
+        "tritanomaly-blue-series": [
+            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "tritanomaly-blue", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 2.0},
+        ],
     }
 
     color_vision_deficency = {"deficiency": "Protanomaly", "severity": 0}
