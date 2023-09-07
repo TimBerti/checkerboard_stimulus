@@ -4,7 +4,7 @@ import threading
 import tkinter as tk
 import numpy as np
 from checkerboard import CheckerBoard
-from labstreaminglayer import LSLReceiver
+from pylsl import StreamInfo, StreamOutlet
 
 
 class CheckerBoardGUI:
@@ -183,18 +183,19 @@ class CheckerBoardGUI:
             preset_rows += 1
 
         i = 0
-        for preset, settings in self.PRESETS.items():
-            tk.Button(self.root, text=preset, command=lambda settings=settings: self.apply_settings(
-                settings)).grid(row=12 + i // max_columns, column=max_columns - 1 - (i % max_columns))
+        for preset in self.PRESETS.keys():
+            tk.Button(self.root, text=preset, command=lambda preset=preset: self.apply_preset(
+                preset)).grid(row=12 + i // max_columns, column=max_columns - 1 - (i % max_columns))
             i += 1
 
         i = 0  # Reset the counter for series buttons
-        for series in self.SERIES.items():
-            tk.Button(self.root, text=series[0], command=lambda series=series: self.run_sequence(
-                *series)).grid(row=12 + preset_rows + i // max_columns, column=max_columns - 1 - (i % max_columns))
+        for series, sequence in self.SERIES.items():
+            tk.Button(self.root, text=series, command=lambda sequence=sequence: self.run_sequence(
+                sequence)).grid(row=12 + preset_rows + i // max_columns, column=max_columns - 1 - (i % max_columns))
             i += 1
 
-        self.receiver = LSLReceiver()
+        stream_info = StreamInfo('marker', 'Markers', 1, 0, 'string', 'myuid34234')
+        self.sender = StreamOutlet(stream_info)
         self.apply_preset("black-and-white-slow")
 
 
@@ -240,8 +241,6 @@ class CheckerBoardGUI:
     def quit(self):
         if self.board:
             self.board.running = False
-        if self.receiver:
-            self.receiver.stop_recieving_thread()
         self.root.quit()
 
     def apply_settings(self, settings):
@@ -260,21 +259,16 @@ class CheckerBoardGUI:
         self.update()
 
     def apply_preset(self, preset):
+        self.sender.push_sample([preset])
         self.apply_settings(self.PRESETS[preset])
 
-    def run_sequence(self, series, sequence):
-        threading.Thread(target=self._sequence, args=[series, sequence]).start()
+    def run_sequence(self, sequence):
+        threading.Thread(target=self._sequence, args=[sequence]).start()
 
-    def _sequence(self, series, sequence):
-        self.update()
-        filename = self.filename.get()
-        if filename:
-            self.receiver.start_recieving_thread(filename + "_" + series + "_" + self.color_vision_deficency["deficiency"] + "_" + str(self.color_vision_deficency["severity"]))
+    def _sequence(self, sequence):
         for step in sequence:
             self.apply_preset(step["preset"])
             time.sleep(step["duration"])
-        if filename:
-            self.receiver.stop_recieving_thread()
         self.apply_preset("black-and-white-slow")
 
     def run(self):

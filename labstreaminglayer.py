@@ -33,10 +33,14 @@ class LSLSender:
 
 class LSLReceiver:
 
-    def __init__(self, type='EEG'):
+    def __init__(self):
 
-        stream = resolve_stream('type', type)
+        stream = resolve_stream('type', 'EEG')
         self.inlet = StreamInlet(stream[0])
+
+        stream = resolve_stream('type', 'Markers')
+        self.marker_inlet = StreamInlet(stream[0])
+
         self.event = Event()
     
     def _recieve_sample(self, filename):
@@ -45,10 +49,13 @@ class LSLReceiver:
             if self.event.is_set():
                 break
             sample, timestamp = self.inlet.pull_sample()
-            data.append([timestamp] + sample)
+            marker, _ = self.marker_inlet.pull_sample()
+            data.append([timestamp] + sample + [marker])
+
+        print("test")
         with open(f'{filename}_{uuid.uuid4()}.csv', 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(['timestamp'] + [f'Ch{i+1}' for i in range(len(sample))])
+            writer.writerow(['timestamp'] + [f'Ch{i+1}' for i in range(len(sample))] + ['marker'])
             writer.writerows(data)
     
     def start_recieving_thread(self, filename):
@@ -57,25 +64,14 @@ class LSLReceiver:
 
     def stop_recieving_thread(self):
         self.event.set()
+        print(f'Event is set:{self.event.is_set()}')
 
 
 def main():
     frequency = 250
 
-    # marker_sender = LSLSender('marker', 'Markers', 1, 0, 'string', 'myuid34234')
-
     eeg_sender = LSLSender('eeg', 'EEG', 8, 250, 'float32', 'myuid34234')
     eeg_sender.start_sending_thread([1, 2, 3, 4, 5, 6, 7, 8], frequency)
-
-    # receiver = LSLReceiver()
-    # receiver.start_recieving_thread()
-
-    # time.sleep(5)
-    # eeg_sender.update_sample([8, 7, 6, 5, 4, 3, 2, 1])
-
-    # time.sleep(5)
-    # receiver.stop_recieving_thread()
-    # eeg_sender.stop_sending_thread()
 
 
 if __name__ == '__main__':
