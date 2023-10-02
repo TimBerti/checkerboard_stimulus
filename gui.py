@@ -1,6 +1,7 @@
 import time
 import colour
 import threading
+import json
 import tkinter as tk
 import numpy as np
 from checkerboard import CheckerBoard
@@ -9,120 +10,63 @@ from pylsl import StreamInfo, StreamOutlet
 
 class CheckerBoardGUI:
 
+    _screen_height = 1440
+    _screen_width = 2560
+    _frequency = 16.0
+    _tile_size = 60
 
     PRESETS = {
-        "black-and-white-slow": {"tile_size": 60, "color1": "255,255,255",
-                     "color2": "0,0,0", "frequency": 1.0, "screen_width": 1920, "screen_height": 1080},
-        "black-and-white": {"tile_size": 60, "color1": "255,255,255",
-                     "color2": "0,0,0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "protanomaly-red": {"tile_size": 60, "color1": "254, 0, 1",
-                     "color2": "128, 18, 0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "protanomaly-green": {"tile_size": 60, "color1": "127, 234, 0",
-                     "color2": "0, 252, 12", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "protanomaly-blue": {"tile_size": 60, "color1": "0, 20, 243",
-                     "color2": "127, 0, 255", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "deuteranomaly-red": {"tile_size": 60, "color1": "255, 0, 4",
-                     "color2": "128, 54, 0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "deuteranomaly-green": {"tile_size": 60, "color1": "32, 161, 0",
-                     "color2": "0, 174, 0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "deuteranomaly-blue": {"tile_size": 60, "color1": "0, 54, 128",
-                     "color2": "127, 0, 132", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "tritanomaly-red": {"tile_size": 60, "color1": "210, 0, 51",
-                     "color2": "255, 22, 0", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "tritanomaly-green": {"tile_size": 60, "color1": "15, 251, 0",
-                     "color2": "0, 247, 12", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
-        "tritanomaly-blue": {"tile_size": 60, "color1": "0, 0, 193",
-                     "color2": "16, 0, 195", "frequency": 16.0, "screen_width": 1920, "screen_height": 1080},
+        "black-and-white-slow": {"tile_size": _tile_size, "color1": "255,255,255",
+                     "color2": "0,0,0", "frequency": 1.0, "screen_width": _screen_width, "screen_height": _screen_height},
+        "grey": {"tile_size": _tile_size, "color1": "127,127,127", "color2": "127,127,127",
+                 "frequency": 1, "screen_width": _screen_width, "screen_height": _screen_height},
+        "black-and-white": {"tile_size": _tile_size, "color1": "255,255,255",
+                     "color2": "0,0,0", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
+        "protanomaly-red": {"tile_size": _tile_size, "color1": "254, 0, 1",
+                     "color2": "128, 18, 0", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
+        "protanomaly-green": {"tile_size": _tile_size, "color1": "127, 234, 0",
+                     "color2": "0, 252, 12", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
+        "protanomaly-blue": {"tile_size": _tile_size, "color1": "0, 20, 243",
+                     "color2": "127, 0, 255", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
+        "deuteranomaly-red": {"tile_size": _tile_size, "color1": "255, 0, 4",
+                     "color2": "128, 54, 0", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
+        "deuteranomaly-green": {"tile_size": _tile_size, "color1": "32, 161, 0",
+                     "color2": "0, 174, 0", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
+        "deuteranomaly-blue": {"tile_size": _tile_size, "color1": "0, 54, 128",
+                     "color2": "127, 0, 132", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
+        "tritanomaly-red": {"tile_size": _tile_size, "color1": "210, 0, 51",
+                     "color2": "255, 22, 0", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
+        "tritanomaly-green": {"tile_size": _tile_size, "color1": "15, 251, 0",
+                     "color2": "0, 247, 12", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
+        "tritanomaly-blue": {"tile_size": _tile_size, "color1": "0, 0, 193",
+                     "color2": "16, 0, 195", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
     }
 
     SERIES = {
         "protanomaly-series": [
-            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "black-and-white-slow", "duration": 2.0},
+            {"preset": "grey", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 4.0},
+            {"preset": "grey", "duration": 4.0},
             {"preset": "protanomaly-red", "duration": 4.0},
-            {"preset": "protanomaly-green", "duration": 4.0},
-            {"preset": "protanomaly-blue", "duration": 4.0},
+            {"preset": "grey", "duration": 4.0},
         ],
         "deuteranomaly-series": [
-            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "black-and-white-slow", "duration": 2.0},
+            {"preset": "grey", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 4.0},
+            {"preset": "grey", "duration": 4.0},
             {"preset": "deuteranomaly-red", "duration": 4.0},
-            {"preset": "deuteranomaly-green", "duration": 4.0},
-            {"preset": "deuteranomaly-blue", "duration": 4.0},
+            {"preset": "grey", "duration": 4.0},
         ],
         "tritanomaly-series": [
-            {"preset": "black-and-white", "duration": 2.0},
-            {"preset": "tritanomaly-red", "duration": 4.0},
-            {"preset": "tritanomaly-green", "duration": 4.0},
-            {"preset": "tritanomaly-blue", "duration": 4.0},
-        ],
-        "red-series": [
-            {"preset": "black-and-white", "duration": 2.0},
-            {"preset": "protanomaly-red", "duration": 4.0},
-            {"preset": "deuteranomaly-red", "duration": 4.0},
-            {"preset": "tritanomaly-red", "duration": 4.0},
-            {"preset": "black-and-white", "duration": 2.0},
-        ],
-        "green-series": [
-            {"preset": "black-and-white", "duration": 2.0},
-            {"preset": "protanomaly-green", "duration": 4.0},
-            {"preset": "deuteranomaly-green", "duration": 4.0},
-            {"preset": "tritanomaly-green", "duration": 4.0},
-        ],
-        "blue-series": [
-            {"preset": "black-and-white", "duration": 2.0},
-            {"preset": "protanomaly-blue", "duration": 4.0},
-            {"preset": "deuteranomaly-blue", "duration": 4.0},
-            {"preset": "tritanomaly-blue", "duration": 4.0},
-        ],
-        "black-and-white-series": [
-            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "black-and-white-slow", "duration": 2.0},
+            {"preset": "grey", "duration": 4.0},
             {"preset": "black-and-white", "duration": 4.0},
-            {"preset": "black-and-white", "duration": 2.0},
-        ],
-        "protanomaly-red-series": [
-            {"preset": "black-and-white", "duration": 2.0},
-            {"preset": "protanomaly-red", "duration": 4.0},
-            {"preset": "black-and-white", "duration": 2.0},
-        ],
-        "deuteranomaly-red-series": [
-            {"preset": "black-and-white", "duration": 2.0},
-            {"preset": "deuteranomaly-red", "duration": 4.0},
-            {"preset": "black-and-white", "duration": 2.0},
-        ],
-        "tritanomaly-red-series": [
-            {"preset": "black-and-white", "duration": 2.0},
+            {"preset": "grey", "duration": 4.0},
             {"preset": "tritanomaly-red", "duration": 4.0},
-            {"preset": "black-and-white", "duration": 2.0},
-        ],
-        "protanomaly-green-series": [
-            {"preset": "black-and-white", "duration": 2.0},
-            {"preset": "protanomaly-green", "duration": 4.0},
-            {"preset": "black-and-white", "duration": 2.0},
-        ],
-        "deuteranomaly-green-series": [
-            {"preset": "black-and-white", "duration": 2.0},
-            {"preset": "deuteranomaly-green", "duration": 4.0},
-            {"preset": "black-and-white", "duration": 2.0},
-        ],
-        "tritanomaly-green-series": [
-            {"preset": "black-and-white", "duration": 2.0},
-            {"preset": "tritanomaly-green", "duration": 4.0},
-            {"preset": "black-and-white", "duration": 2.0},
-        ],
-        "protanomaly-blue-series": [
-            {"preset": "black-and-white", "duration": 2.0},
-            {"preset": "protanomaly-blue", "duration": 4.0},
-            {"preset": "black-and-white", "duration": 2.0},
-        ],
-        "deuteranomaly-blue-series": [
-            {"preset": "black-and-white", "duration": 2.0},
-            {"preset": "deuteranomaly-blue", "duration": 4.0},
-            {"preset": "black-and-white", "duration": 2.0},
-        ],
-        "tritanomaly-blue-series": [
-            {"preset": "black-and-white", "duration": 2.0},
-            {"preset": "tritanomaly-blue", "duration": 4.0},
-            {"preset": "black-and-white", "duration": 2.0},
-        ],
+            {"preset": "grey", "duration": 4.0},
+        ]
     }
 
     color_vision_deficency = {"deficiency": "Protanomaly", "severity": 0}
@@ -142,7 +86,6 @@ class CheckerBoardGUI:
         tk.Label(self.root, text="Color Vision Deficiency:").grid(
             row=7, column=0)
         tk.Label(self.root, text="Severity:").grid(row=8, column=0)
-        tk.Label(self.root, text="Filename:").grid(row=9, column=0)
 
         self.tile_size = tk.Entry(self.root)
         self.color1 = tk.Entry(self.root)
@@ -156,7 +99,6 @@ class CheckerBoardGUI:
             self.root, self.deficiency, "Protanomaly", "Deuteranomaly", "Tritanomaly")
         self.severity = tk.Scale(
             self.root, from_=0, to=1, resolution=0.1, orient=tk.HORIZONTAL,)
-        self.filename = tk.Entry(self.root)
 
         self.tile_size.grid(row=1, column=1)
         self.color1.grid(row=2, column=1)
@@ -166,7 +108,6 @@ class CheckerBoardGUI:
         self.screen_height.grid(row=6, column=1)
         self.dropdown.grid(row=7, column=1)
         self.severity.grid(row=8, column=1)
-        self.filename.grid(row=9, column=1)
 
         tk.Button(self.root, text="Start",
                   command=self.start).grid(row=10, column=0)
@@ -189,9 +130,9 @@ class CheckerBoardGUI:
             i += 1
 
         i = 0  # Reset the counter for series buttons
-        for series, sequence in self.SERIES.items():
-            tk.Button(self.root, text=series, command=lambda sequence=sequence: self.run_sequence(
-                sequence)).grid(row=12 + preset_rows + i // max_columns, column=max_columns - 1 - (i % max_columns))
+        for series in self.SERIES.items():
+            tk.Button(self.root, text=series[0], command=lambda series=series: self.run_sequence(
+                *series)).grid(row=12 + preset_rows + i // max_columns, column=max_columns - 1 - (i % max_columns))
             i += 1
 
         stream_info = StreamInfo('marker', 'Markers', 1, 0, 'string', 'myuid34234')
@@ -262,14 +203,25 @@ class CheckerBoardGUI:
         self.sender.push_sample([preset])
         self.apply_settings(self.PRESETS[preset])
 
-    def run_sequence(self, sequence):
-        threading.Thread(target=self._sequence, args=[sequence]).start()
+    def run_sequence(self, series, sequence):
+        threading.Thread(target=self._sequence, args=[series, sequence]).start()
 
-    def _sequence(self, sequence):
+    def _sequence(self, series, sequence):
+        meta_data = {
+            "series": series,
+            "screen_width": self._screen_width,
+            "screen_height": self._screen_height,
+            "frequency": self._frequency,
+            "tile_size": self._tile_size,
+            "deficiency": self.color_vision_deficency["deficiency"], 
+            "severity": self.color_vision_deficency["severity"]
+        }
+        self.sender.push_sample([json.dumps(meta_data)])
         for step in sequence:
             self.apply_preset(step["preset"])
             time.sleep(step["duration"])
         self.apply_preset("black-and-white-slow")
+        self.sender.push_sample(["stop"])
 
     def run(self):
         self.root.mainloop()
