@@ -3,6 +3,7 @@ from threading import Thread, Event
 import time
 import uuid
 import csv
+import numpy as np
 
 
 class LSLSender:
@@ -71,7 +72,7 @@ def main():
     frequency = 250
 
     eeg_sender = LSLSender('eeg', 'EEG', 8, 250, 'float32', 'myuid34234')
-    eeg_sender.start_sending_thread([1, 2, 3, 4, 5, 6, 7, 8], frequency)
+    eeg_sender.start_sending_thread(np.random.rand(8), frequency)
 
 
 if __name__ == '__main__':

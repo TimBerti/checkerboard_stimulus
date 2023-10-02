@@ -50,6 +50,7 @@ class CheckerBoardGUI:
             {"preset": "grey", "duration": 4.0},
             {"preset": "protanomaly-red", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
+            {"preset": "black-and-white-slow", "duration": 4.0},
         ],
         "deuteranomaly-series": [
             {"preset": "black-and-white-slow", "duration": 2.0},
@@ -58,6 +59,7 @@ class CheckerBoardGUI:
             {"preset": "grey", "duration": 4.0},
             {"preset": "deuteranomaly-red", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
+            {"preset": "black-and-white-slow", "duration": 4.0},
         ],
         "tritanomaly-series": [
             {"preset": "black-and-white-slow", "duration": 2.0},
@@ -66,6 +68,7 @@ class CheckerBoardGUI:
             {"preset": "grey", "duration": 4.0},
             {"preset": "tritanomaly-red", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
+            {"preset": "black-and-white-slow", "duration": 4.0},
         ]
     }
 
