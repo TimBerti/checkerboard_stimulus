@@ -13,7 +13,7 @@ class CheckerBoardGUI:
     _screen_height = 1440
     _screen_width = 2560
     _frequency = 16.0
-    _tile_size = 60
+    _tile_size = 120
 
     PRESETS = {
         "black-and-white-slow": {"tile_size": _tile_size, "color1": "255,255,255",
@@ -43,32 +43,33 @@ class CheckerBoardGUI:
     }
 
     SERIES = {
+        "reference-series": [
+            {"preset": "grey", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 4.0},
+            {"preset": "grey", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 4.0},
+            {"preset": "grey", "duration": 4.0},
+        ],
         "protanomaly-series": [
-            {"preset": "black-and-white-slow", "duration": 2.0},
             {"preset": "grey", "duration": 4.0},
             {"preset": "black-and-white", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
             {"preset": "protanomaly-red", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
-            {"preset": "black-and-white-slow", "duration": 4.0},
         ],
         "deuteranomaly-series": [
-            {"preset": "black-and-white-slow", "duration": 2.0},
             {"preset": "grey", "duration": 4.0},
             {"preset": "black-and-white", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
             {"preset": "deuteranomaly-red", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
-            {"preset": "black-and-white-slow", "duration": 4.0},
         ],
         "tritanomaly-series": [
-            {"preset": "black-and-white-slow", "duration": 2.0},
             {"preset": "grey", "duration": 4.0},
             {"preset": "black-and-white", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
             {"preset": "tritanomaly-red", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
-            {"preset": "black-and-white-slow", "duration": 4.0},
         ]
     }
 
@@ -140,7 +141,7 @@ class CheckerBoardGUI:
 
         stream_info = StreamInfo('marker', 'Markers', 1, 0, 'string', 'myuid34234')
         self.sender = StreamOutlet(stream_info)
-        self.apply_preset("black-and-white-slow")
+        self.apply_preset("grey")
 
 
     def start(self):
@@ -223,7 +224,7 @@ class CheckerBoardGUI:
         for step in sequence:
             self.apply_preset(step["preset"])
             time.sleep(step["duration"])
-        self.apply_preset("black-and-white-slow")
+        self.apply_preset("grey")
         self.sender.push_sample(["stop"])
 
     def run(self):
