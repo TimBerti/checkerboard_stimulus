@@ -10,36 +10,23 @@ from pylsl import StreamInfo, StreamOutlet
 
 class CheckerBoardGUI:
 
-    _screen_height = 1440
-    _screen_width = 2560
-    _frequency = 16.0
-    _tile_size = 120
+    DEFAULT_SETTINGS = {
+        "tile_size": 120, "color1": "127,127,127", "color2": "127,127,127",
+        "frequency": 7.5, "screen_width": 2560, "screen_height": 1440
+    }
 
     PRESETS = {
-        "black-and-white-slow": {"tile_size": _tile_size, "color1": "255,255,255",
-                     "color2": "0,0,0", "frequency": 1.0, "screen_width": _screen_width, "screen_height": _screen_height},
-        "grey": {"tile_size": _tile_size, "color1": "127,127,127", "color2": "127,127,127",
-                 "frequency": 1, "screen_width": _screen_width, "screen_height": _screen_height},
-        "black-and-white": {"tile_size": _tile_size, "color1": "255,255,255",
-                     "color2": "0,0,0", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
-        "protanomaly-red": {"tile_size": _tile_size, "color1": "254, 0, 1",
-                     "color2": "128, 18, 0", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
-        "protanomaly-green": {"tile_size": _tile_size, "color1": "127, 234, 0",
-                     "color2": "0, 252, 12", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
-        "protanomaly-blue": {"tile_size": _tile_size, "color1": "0, 20, 243",
-                     "color2": "127, 0, 255", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
-        "deuteranomaly-red": {"tile_size": _tile_size, "color1": "255, 0, 4",
-                     "color2": "128, 54, 0", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
-        "deuteranomaly-green": {"tile_size": _tile_size, "color1": "32, 161, 0",
-                     "color2": "0, 174, 0", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
-        "deuteranomaly-blue": {"tile_size": _tile_size, "color1": "0, 54, 128",
-                     "color2": "127, 0, 132", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
-        "tritanomaly-red": {"tile_size": _tile_size, "color1": "210, 0, 51",
-                     "color2": "255, 22, 0", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
-        "tritanomaly-green": {"tile_size": _tile_size, "color1": "15, 251, 0",
-                     "color2": "0, 247, 12", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
-        "tritanomaly-blue": {"tile_size": _tile_size, "color1": "0, 0, 193",
-                     "color2": "16, 0, 195", "frequency": _frequency, "screen_width": _screen_width, "screen_height": _screen_height},
+        "grey": {"color1": "127,127,127", "color2": "127,127,127"},
+        "black-and-white": {"color1": "255,255,255", "color2": "0,0,0"},
+        "protanomaly-red": {"color1": "254, 0, 1", "color2": "128, 18, 0"},
+        # "protanomaly-green": {"color1": "127, 234, 0", "color2": "0, 252, 12"},
+        # "protanomaly-blue": {"color1": "0, 20, 243", "color2": "127, 0, 255"},
+        "deuteranomaly-red": {"color1": "255, 0, 4", "color2": "128, 54, 0"},
+        # "deuteranomaly-green": {"color1": "32, 161, 0", "color2": "0, 174, 0"},
+        # "deuteranomaly-blue": {"color1": "0, 54, 128", "color2": "127, 0, 132"},
+        # "tritanomaly-red": {"color1": "210, 0, 51", "color2": "255, 22, 0"},
+        # "tritanomaly-green": {"color1": "15, 251, 0", "color2": "0, 247, 12"},
+        # "tritanomaly-blue": {"color1": "0, 0, 193", "color2": "16, 0, 195"},
     }
 
     SERIES = {
@@ -52,25 +39,25 @@ class CheckerBoardGUI:
         ],
         "protanomaly-series": [
             {"preset": "grey", "duration": 4.0},
-            {"preset": "black-and-white", "duration": 4.0},
+            {"preset": "protanomaly-red", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
             {"preset": "protanomaly-red", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
         ],
         "deuteranomaly-series": [
             {"preset": "grey", "duration": 4.0},
-            {"preset": "black-and-white", "duration": 4.0},
+            {"preset": "deuteranomaly-red", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
             {"preset": "deuteranomaly-red", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
         ],
-        "tritanomaly-series": [
+        "mixed-series": [
             {"preset": "grey", "duration": 4.0},
             {"preset": "black-and-white", "duration": 4.0},
+            {"preset": "protanomaly-red", "duration": 4.0},
+            {"preset": "deuteranomaly-red", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
-            {"preset": "tritanomaly-red", "duration": 4.0},
-            {"preset": "grey", "duration": 4.0},
-        ]
+        ],
     }
 
     color_vision_deficency = {"deficiency": "Protanomaly", "severity": 0}
@@ -129,8 +116,8 @@ class CheckerBoardGUI:
 
         i = 0
         for preset in self.PRESETS.keys():
-            tk.Button(self.root, text=preset, command=lambda preset=preset: self.apply_preset(
-                preset)).grid(row=12 + i // max_columns, column=max_columns - 1 - (i % max_columns))
+            tk.Button(self.root, text=preset, command=lambda preset=preset: self.apply_settings(
+                self.PRESETS[preset])).grid(row=12 + i // max_columns, column=max_columns - 1 - (i % max_columns))
             i += 1
 
         i = 0  # Reset the counter for series buttons
@@ -141,7 +128,7 @@ class CheckerBoardGUI:
 
         stream_info = StreamInfo('marker', 'Markers', 1, 0, 'string', 'myuid34234')
         self.sender = StreamOutlet(stream_info)
-        self.apply_preset("grey")
+        self.apply_settings(self.DEFAULT_SETTINGS)
 
 
     def start(self):
@@ -189,23 +176,25 @@ class CheckerBoardGUI:
         self.root.quit()
 
     def apply_settings(self, settings):
-        self.tile_size.delete(0, tk.END)
-        self.tile_size.insert(0, str(settings["tile_size"]))
-        self.color1.delete(0, tk.END)
-        self.color1.insert(0, settings["color1"])
-        self.color2.delete(0, tk.END)
-        self.color2.insert(0, settings["color2"])
-        self.frequency.delete(0, tk.END)
-        self.frequency.insert(0, str(settings["frequency"]))
-        self.screen_width.delete(0, tk.END)
-        self.screen_width.insert(0, str(settings["screen_width"]))
-        self.screen_height.delete(0, tk.END)
-        self.screen_height.insert(0, str(settings["screen_height"]))
+        if "tile_size" in settings:
+            self.tile_size.delete(0, tk.END)
+            self.tile_size.insert(0, str(settings["tile_size"]))
+        if "color1" in settings:
+            self.color1.delete(0, tk.END)
+            self.color1.insert(0, settings["color1"])
+        if "color2" in settings:
+            self.color2.delete(0, tk.END)
+            self.color2.insert(0, settings["color2"])
+        if "frequency" in settings:
+            self.frequency.delete(0, tk.END)
+            self.frequency.insert(0, str(settings["frequency"]))
+        if "screen_width" in settings:
+            self.screen_width.delete(0, tk.END)
+            self.screen_width.insert(0, str(settings["screen_width"]))
+        if "screen_height" in settings:
+            self.screen_height.delete(0, tk.END)
+            self.screen_height.insert(0, str(settings["screen_height"]))
         self.update()
-
-    def apply_preset(self, preset):
-        self.sender.push_sample([preset])
-        self.apply_settings(self.PRESETS[preset])
 
     def run_sequence(self, series, sequence):
         threading.Thread(target=self._sequence, args=[series, sequence]).start()
@@ -213,18 +202,19 @@ class CheckerBoardGUI:
     def _sequence(self, series, sequence):
         meta_data = {
             "series": series,
-            "screen_width": self._screen_width,
-            "screen_height": self._screen_height,
-            "frequency": self._frequency,
-            "tile_size": self._tile_size,
+            "screen_width": self.screen_width.get(),
+            "screen_height": self.screen_height.get(),
+            "frequency": self.frequency.get(),
+            "tile_size": self.tile_size.get(),
             "deficiency": self.color_vision_deficency["deficiency"], 
             "severity": self.color_vision_deficency["severity"]
         }
         self.sender.push_sample([json.dumps(meta_data)])
         for step in sequence:
-            self.apply_preset(step["preset"])
+            self.sender.push_sample([step["preset"]])
+            self.apply_settings(self.PRESETS[step["preset"]])
             time.sleep(step["duration"])
-        self.apply_preset("grey")
+        self.apply_settings(self.PRESETS["grey"])
         self.sender.push_sample(["stop"])
 
     def run(self):
