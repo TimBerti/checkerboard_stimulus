@@ -17,7 +17,7 @@ while True:
     sample, timestamp = eeg_inlet.pull_sample()
     marker, _ = marker_inlet.pull_sample(timeout=0.0)
     if marker is not None:
-        print(marker)
+        print(marker[0])
         current_marker = marker
     if current_marker[0] == 'stop':
         break
@@ -26,7 +26,7 @@ while True:
 
 
 meta_data = json.loads(data[0][-1])
-filename = f'{subject}_{meta_data["deficiency"]}_{meta_data["severity"]}_{meta_data["series"]}_{uuid.uuid4()}'
+filename = f'{subject}_{meta_data["deficiency"]}_{meta_data["severity"]}_{meta_data["series"]}_frequency_{meta_data["frequency"]}_tile-size{meta_data["tile_size"]}_{uuid.uuid4()}'
 
 with open(f'../Data/{filename}.csv', 'w', newline='') as csvfile:
     writer = csv.writer(csvfile)
