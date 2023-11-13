@@ -51,6 +51,20 @@ class CheckerBoardGUI:
             {"preset": "deuteranomaly-red", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
         ],
+        "mixed-deuteranomaly-series": [
+            {"preset": "grey", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 4.0},
+            {"preset": "grey", "duration": 4.0},
+            {"preset": "deuteranomaly-red", "duration": 4.0},
+            {"preset": "grey", "duration": 4.0},
+        ],
+        "mixed-protanomaly-series": [
+            {"preset": "grey", "duration": 4.0},
+            {"preset": "black-and-white", "duration": 4.0},
+            {"preset": "grey", "duration": 4.0},
+            {"preset": "protanomaly-red", "duration": 4.0},
+            {"preset": "grey", "duration": 4.0},
+        ],
         "mixed-series": [
             {"preset": "grey", "duration": 4.0},
             {"preset": "black-and-white", "duration": 4.0},
@@ -60,7 +74,7 @@ class CheckerBoardGUI:
         ],
     }
 
-    color_vision_deficency = {"deficiency": "Protanomaly", "severity": 0}
+    color_vision_deficency = {"deficiency": "Deuteranomaly", "severity": 0}
 
     def __init__(self):
 
@@ -85,9 +99,9 @@ class CheckerBoardGUI:
         self.screen_width = tk.Entry(self.root)
         self.screen_height = tk.Entry(self.root)
         self.deficiency = tk.StringVar(self.root)
-        self.deficiency.set("Protanomaly")
+        self.deficiency.set("Deuteranomaly")
         self.dropdown = tk.OptionMenu(
-            self.root, self.deficiency, "Protanomaly", "Deuteranomaly", "Tritanomaly")
+            self.root, self.deficiency, "Deuteranomaly", "Protanomaly", "Tritanomaly")
         self.severity = tk.Scale(
             self.root, from_=0, to=1, resolution=0.1, orient=tk.HORIZONTAL,)
 
