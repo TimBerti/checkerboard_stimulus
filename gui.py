@@ -2,10 +2,13 @@ import time
 import colour
 import threading
 import json
-import tkinter as tk
+import customtkinter as ctk
 import numpy as np
 from checkerboard import CheckerBoard
 from pylsl import StreamInfo, StreamOutlet
+
+ctk.set_appearance_mode("Light")
+ctk.set_default_color_theme("blue")
 
 
 class CheckerBoardGUI:
@@ -78,32 +81,35 @@ class CheckerBoardGUI:
 
     def __init__(self):
 
-        self.root = tk.Tk()
+        self.root = ctk.CTk()
+        self.root.title("Checkerboard GUI")
         self.root.protocol("WM_DELETE_WINDOW", self.quit)
         self.board = None
 
-        tk.Label(self.root, text="Tile Size:").grid(row=1, column=0)
-        tk.Label(self.root, text="Color 1 (R,G,B):").grid(row=2, column=0)
-        tk.Label(self.root, text="Color 2 (R,G,B):").grid(row=3, column=0)
-        tk.Label(self.root, text="Frequency:").grid(row=4, column=0)
-        tk.Label(self.root, text="Screen Width:").grid(row=5, column=0)
-        tk.Label(self.root, text="Screen Height:").grid(row=6, column=0)
-        tk.Label(self.root, text="Color Vision Deficiency:").grid(
+        ctk.CTkLabel(self.root, text="Tile Size:").grid(row=1, column=0)
+        ctk.CTkLabel(self.root, text="Color 1 (R,G,B):").grid(row=2, column=0)
+        ctk.CTkLabel(self.root, text="Color 2 (R,G,B):").grid(row=3, column=0)
+        ctk.CTkLabel(self.root, text="Frequency:").grid(row=4, column=0)
+        ctk.CTkLabel(self.root, text="Screen Width:").grid(row=5, column=0)
+        ctk.CTkLabel(self.root, text="Screen Height:").grid(row=6, column=0)
+        ctk.CTkLabel(self.root, text="Color Vision Deficiency:").grid(
             row=7, column=0)
-        tk.Label(self.root, text="Severity:").grid(row=8, column=0)
+        ctk.CTkLabel(self.root, text="Severity:").grid(row=8, column=0)
 
-        self.tile_size = tk.Entry(self.root)
-        self.color1 = tk.Entry(self.root)
-        self.color2 = tk.Entry(self.root)
-        self.frequency = tk.Entry(self.root)
-        self.screen_width = tk.Entry(self.root)
-        self.screen_height = tk.Entry(self.root)
-        self.deficiency = tk.StringVar(self.root)
-        self.deficiency.set("Deuteranomaly")
-        self.dropdown = tk.OptionMenu(
-            self.root, self.deficiency, "Deuteranomaly", "Protanomaly", "Tritanomaly")
-        self.severity = tk.Scale(
-            self.root, from_=0, to=1, resolution=0.1, orient=tk.HORIZONTAL,)
+        self.tile_size = ctk.CTkEntry(self.root)
+        self.color1 = ctk.CTkEntry(self.root)
+        self.color2 = ctk.CTkEntry(self.root)
+        self.frequency = ctk.CTkEntry(self.root)
+        self.screen_width = ctk.CTkEntry(self.root)
+        self.screen_height = ctk.CTkEntry(self.root)
+        self.deficiency = ctk.CTkOptionMenu(
+            self.root, values = ["Deuteranomaly", "Protanomaly", "Tritanomaly"])
+        self.severity = ctk.DoubleVar(self.root)
+        def round_sensitivity(_):
+            self.severity.set(round(float(self.severity.get()), 2))
+        self.severity_slider = ctk.CTkSlider(
+            self.root, from_=0, to=1, number_of_steps=100, variable=self.severity, command=round_sensitivity)
+        self.slider_val = ctk.CTkLabel(self.root, textvariable=self.severity)
 
         self.tile_size.grid(row=1, column=1)
         self.color1.grid(row=2, column=1)
@@ -111,15 +117,16 @@ class CheckerBoardGUI:
         self.frequency.grid(row=4, column=1)
         self.screen_width.grid(row=5, column=1)
         self.screen_height.grid(row=6, column=1)
-        self.dropdown.grid(row=7, column=1)
-        self.severity.grid(row=8, column=1)
+        self.deficiency.grid(row=7, column=1)
+        self.severity_slider.grid(row=8, column=1)
+        self.slider_val.grid(row=8, column=2)
 
-        tk.Button(self.root, text="Start",
-                  command=self.start).grid(row=10, column=0)
-        tk.Button(self.root, text="Update",
-                  command=self.update).grid(row=10, column=1)
-        tk.Button(self.root, text="Pause",
-                  command=self.pause).grid(row=11, column=0)
+        ctk.CTkButton(self.root, text="Start",
+                  command=self.start).grid(row=10, column=0, pady=10, padx=10)
+        ctk.CTkButton(self.root, text="Pause",
+                  command=self.pause).grid(row=10, column=1, pady=10, padx=10)
+        ctk.CTkButton(self.root, text="Update",
+                  command=self.update).grid(row=10, column=2, pady=10, padx=10)
 
         max_columns = 3
 
@@ -128,16 +135,20 @@ class CheckerBoardGUI:
         if len(self.PRESETS) % max_columns > 0:
             preset_rows += 1
 
+        ctk.CTkLabel(self.root, text="Presets:").grid(row=11, column=0)
+
         i = 0
         for preset in self.PRESETS.keys():
-            tk.Button(self.root, text=preset, command=lambda preset=preset: self.apply_settings(
-                self.PRESETS[preset])).grid(row=12 + i // max_columns, column=max_columns - 1 - (i % max_columns))
+            ctk.CTkButton(self.root, text=preset, command=lambda preset=preset: self.apply_settings(
+                self.PRESETS[preset])).grid(row=12 + i // max_columns, column=max_columns - 1 - ((i - 1) % max_columns), pady=10, padx=10)
             i += 1
+
+        ctk.CTkLabel(self.root, text="Series:").grid(row=13 + preset_rows, column=0)
 
         i = 0  # Reset the counter for series buttons
         for series in self.SERIES.items():
-            tk.Button(self.root, text=series[0], command=lambda series=series: self.run_sequence(
-                *series)).grid(row=12 + preset_rows + i // max_columns, column=max_columns - 1 - (i % max_columns))
+            ctk.CTkButton(self.root, text=series[0], command=lambda series=series: self.run_sequence(
+                *series)).grid(row=14 + preset_rows + i // max_columns, column=max_columns - 1 - ((i - 1) % max_columns), pady=10, padx=10)
             i += 1
 
         stream_info = StreamInfo('marker', 'Markers', 1, 0, 'string', 'myuid34234')
@@ -191,22 +202,22 @@ class CheckerBoardGUI:
 
     def apply_settings(self, settings):
         if "tile_size" in settings:
-            self.tile_size.delete(0, tk.END)
+            self.tile_size.delete(0, ctk.END)
             self.tile_size.insert(0, str(settings["tile_size"]))
         if "color1" in settings:
-            self.color1.delete(0, tk.END)
+            self.color1.delete(0, ctk.END)
             self.color1.insert(0, settings["color1"])
         if "color2" in settings:
-            self.color2.delete(0, tk.END)
+            self.color2.delete(0, ctk.END)
             self.color2.insert(0, settings["color2"])
         if "frequency" in settings:
-            self.frequency.delete(0, tk.END)
+            self.frequency.delete(0, ctk.END)
             self.frequency.insert(0, str(settings["frequency"]))
         if "screen_width" in settings:
-            self.screen_width.delete(0, tk.END)
+            self.screen_width.delete(0, ctk.END)
             self.screen_width.insert(0, str(settings["screen_width"]))
         if "screen_height" in settings:
-            self.screen_height.delete(0, tk.END)
+            self.screen_height.delete(0, ctk.END)
             self.screen_height.insert(0, str(settings["screen_height"]))
         self.update()
 
