@@ -151,7 +151,7 @@ class CheckerBoardGUI:
                 *series)).grid(row=14 + preset_rows + i // max_columns, column=max_columns - 1 - ((i - 1) % max_columns), pady=10, padx=10)
             i += 1
 
-        stream_info = StreamInfo('marker', 'Markers', 1, 0, 'string', 'myuid34234')
+        stream_info = StreamInfo('marker', 'Markers', 2, 0, 'string', 'myuid34234')
         self.sender = StreamOutlet(stream_info)
         self.apply_settings(self.DEFAULT_SETTINGS)
 
@@ -225,7 +225,7 @@ class CheckerBoardGUI:
         threading.Thread(target=self._sequence, args=[series, sequence]).start()
 
     def _sequence(self, series, sequence):
-        meta_data = {
+        meta_data = json.dumps({
             "series": series,
             "screen_width": self.screen_width.get(),
             "screen_height": self.screen_height.get(),
@@ -233,14 +233,14 @@ class CheckerBoardGUI:
             "tile_size": self.tile_size.get(),
             "deficiency": self.color_vision_deficency["deficiency"], 
             "severity": self.color_vision_deficency["severity"]
-        }
-        self.sender.push_sample([json.dumps(meta_data)])
+        })
+        self.sender.push_sample(["start", meta_data])
         for step in sequence:
-            self.sender.push_sample([step["preset"]])
+            self.sender.push_sample([step["preset"], meta_data])
             self.apply_settings(self.PRESETS[step["preset"]])
             time.sleep(step["duration"])
         self.apply_settings(self.PRESETS["grey"])
-        self.sender.push_sample(["stop"])
+        self.sender.push_sample(["stop", meta_data])
 
     def run(self):
         self.root.mainloop()
