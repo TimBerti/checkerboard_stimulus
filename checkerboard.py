@@ -35,7 +35,7 @@ class CheckerBoard:
         self.surface.fill((0, 0, 0))
                 
         self.dot_radius = 10 
-        self.dot_color = self._largest_contrast(color1, color2)
+        self.dot_color = (0, 0, 0)
         self.dot_position = (self.screen_width // 2, self.screen_height // 2)
         pygame.display.flip()
 
@@ -71,9 +71,4 @@ class CheckerBoard:
 
     def _get_color_sequence(self):
         return (self.color1, self.color2) if int(time.time() * self.frequency) % 2 == 0 else (self.color2, self.color1)
-
-    def _largest_contrast(self, color1, color2):
-        color1 = np.array(color1)
-        color2 = np.array(color2)
-        return tuple(np.cross(color1, color2).clip(0, 255).astype(int))
         
