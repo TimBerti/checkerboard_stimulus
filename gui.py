@@ -30,6 +30,16 @@ class CheckerBoardGUI:
         # "tritanomaly-red": {"color1": "210, 0, 51", "color2": "255, 22, 0"},
         # "tritanomaly-green": {"color1": "15, 251, 0", "color2": "0, 247, 12"},
         # "tritanomaly-blue": {"color1": "0, 0, 193", "color2": "16, 0, 195"},
+        "protanomaly-contrast_0.0": {"color1": "0, 37,0", "color2": "255, 0 ,0"},
+        "protanomaly-contrast_0.45": {"color1": "23, 31, 0", "color2": "126, 22, 0"},
+        "protanomaly-contrast_0.65": {"color1": "29, 30, 0", "color2": "89, 26, 0"},
+        "protanomaly-contrast_0.8": {"color1": "34, 29, 0", "color2": "66, 28, 0"},
+        "protanomaly-contrast_0.9": {"color1": "36, 29, 0", "color2": "51, 28, 0"},
+        "deuteranomaly-contrast_0.0": {"color1": "0, 106,0", "color2": "255, 0 ,7"},
+        "deuteranomaly-contrast_0.45": {"color1": "61, 84, 2", "color2": "144, 43, 5"},
+        "deuteranomaly-contrast_0.65": {"color1": "75, 79, 3", "color2": "119, 55, 4"},
+        "deuteranomaly-contrast_0.8": {"color1": "83, 75, 3", "color2": "106, 63, 4"},
+        "deuteranomaly-contrast_0.9": {"color1": "87, 73, 4", "color2": "98, 67, 4"},
     }
 
     SERIES = {
@@ -74,6 +84,24 @@ class CheckerBoardGUI:
             {"preset": "protanomaly-red", "duration": 4.0},
             {"preset": "deuteranomaly-red", "duration": 4.0},
             {"preset": "grey", "duration": 4.0},
+        ],
+        "protanomaly-contrast-series": [
+            {"preset": "grey", "duration": 2.0},
+            {"preset": "protanomaly-contrast_0.0", "duration": 4.0},
+            {"preset": "protanomaly-contrast_0.8", "duration": 4.0},
+            {"preset": "protanomaly-contrast_0.45", "duration": 4.0},
+            {"preset": "protanomaly-contrast_0.9", "duration": 4.0},
+            {"preset": "protanomaly-contrast_0.65", "duration": 4.0},
+            {"preset": "grey", "duration": 2.0},
+        ],
+        "deuteranomaly-contrast-series": [
+            {"preset": "grey", "duration": 2.0},
+            {"preset": "deuteranomaly-contrast_0.0", "duration": 4.0},
+            {"preset": "deuteranomaly-contrast_0.8", "duration": 4.0},
+            {"preset": "deuteranomaly-contrast_0.45", "duration": 4.0},
+            {"preset": "deuteranomaly-contrast_0.9", "duration": 4.0},
+            {"preset": "deuteranomaly-contrast_0.65", "duration": 4.0},
+            {"preset": "grey", "duration": 2.0},
         ],
     }
 

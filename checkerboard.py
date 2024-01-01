@@ -32,7 +32,7 @@ class CheckerBoard:
     def update_params(self, tile_size, color1, color2, frequency, screen_width, screen_height):
         self._init_board_params(tile_size, color1, color2,
                                 frequency, screen_width, screen_height)
-        self.surface.fill((0, 0, 0))
+        # self.surface.fill((0, 0, 0))
                 
         self.dot_radius = 10 
         self.dot_color = (0, 0, 0)
