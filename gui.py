@@ -14,8 +14,8 @@ ctk.set_default_color_theme("blue")
 class CheckerBoardGUI:
 
     DEFAULT_SETTINGS = {
-        "tile_size": 120, "color1": "127,127,127", "color2": "127,127,127",
-        "frequency": 7.5, "screen_width": 2560, "screen_height": 1440
+        "tile_size": 144, "color1": "127,127,127", "color2": "127,127,127",
+        "frequency": 16.5, "screen_width": 2560, "screen_height": 1440
     }
 
     PRESETS = {
@@ -101,6 +101,21 @@ class CheckerBoardGUI:
             {"preset": "deuteranomaly-contrast_0.45", "duration": 4.0},
             {"preset": "deuteranomaly-contrast_0.9", "duration": 4.0},
             {"preset": "deuteranomaly-contrast_0.65", "duration": 4.0},
+            {"preset": "grey", "duration": 2.0},
+        ],
+        "contrast-series": [
+            {"preset": "grey", "duration": 2.0},
+            {"preset": "black-and-white", "duration": 3.0},
+            {"preset": "grey", "duration": 2.0},
+            {"preset": "deuteranomaly-contrast_0.0", "duration": 3.0},
+            {"preset": "grey", "duration": 2.0},
+            {"preset": "protanomaly-contrast_0.8", "duration": 3.0},
+            {"preset": "grey", "duration": 2.0},
+            {"preset": "black-and-white", "duration": 3.0},
+            {"preset": "grey", "duration": 2.0},
+            {"preset": "protanomaly-contrast_0.0", "duration": 3.0},
+            {"preset": "grey", "duration": 2.0},
+            {"preset": "deuteranomaly-contrast_0.8", "duration": 3.0},
             {"preset": "grey", "duration": 2.0},
         ],
     }
@@ -253,6 +268,7 @@ class CheckerBoardGUI:
         threading.Thread(target=self._sequence, args=[series, sequence]).start()
 
     def _sequence(self, series, sequence):
+        self.update()
         meta_data = json.dumps({
             "series": series,
             "screen_width": self.screen_width.get(),
